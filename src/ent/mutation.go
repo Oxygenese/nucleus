@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/basemodel"
+	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/base"
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/node"
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/predicate"
 
@@ -25,12 +25,12 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeBaseModel = "BaseModel"
-	TypeNode      = "Node"
+	TypeBase = "Base"
+	TypeNode = "Node"
 )
 
-// BaseModelMutation represents an operation that mutates the BaseModel nodes in the graph.
-type BaseModelMutation struct {
+// BaseMutation represents an operation that mutates the Base nodes in the graph.
+type BaseMutation struct {
 	config
 	op            Op
 	typ           string
@@ -39,21 +39,21 @@ type BaseModelMutation struct {
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	done          bool
-	oldValue      func(context.Context) (*BaseModel, error)
-	predicates    []predicate.BaseModel
+	oldValue      func(context.Context) (*Base, error)
+	predicates    []predicate.Base
 }
 
-var _ ent.Mutation = (*BaseModelMutation)(nil)
+var _ ent.Mutation = (*BaseMutation)(nil)
 
-// basemodelOption allows management of the mutation configuration using functional options.
-type basemodelOption func(*BaseModelMutation)
+// baseOption allows management of the mutation configuration using functional options.
+type baseOption func(*BaseMutation)
 
-// newBaseModelMutation creates new mutation for the BaseModel entity.
-func newBaseModelMutation(c config, op Op, opts ...basemodelOption) *BaseModelMutation {
-	m := &BaseModelMutation{
+// newBaseMutation creates new mutation for the Base entity.
+func newBaseMutation(c config, op Op, opts ...baseOption) *BaseMutation {
+	m := &BaseMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeBaseModel,
+		typ:           TypeBase,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -62,20 +62,20 @@ func newBaseModelMutation(c config, op Op, opts ...basemodelOption) *BaseModelMu
 	return m
 }
 
-// withBaseModelID sets the ID field of the mutation.
-func withBaseModelID(id int) basemodelOption {
-	return func(m *BaseModelMutation) {
+// withBaseID sets the ID field of the mutation.
+func withBaseID(id int) baseOption {
+	return func(m *BaseMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *BaseModel
+			value *Base
 		)
-		m.oldValue = func(ctx context.Context) (*BaseModel, error) {
+		m.oldValue = func(ctx context.Context) (*Base, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().BaseModel.Get(ctx, id)
+					value, err = m.Client().Base.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -84,10 +84,10 @@ func withBaseModelID(id int) basemodelOption {
 	}
 }
 
-// withBaseModel sets the old BaseModel of the mutation.
-func withBaseModel(node *BaseModel) basemodelOption {
-	return func(m *BaseModelMutation) {
-		m.oldValue = func(context.Context) (*BaseModel, error) {
+// withBase sets the old Base of the mutation.
+func withBase(node *Base) baseOption {
+	return func(m *BaseMutation) {
+		m.oldValue = func(context.Context) (*Base, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -96,7 +96,7 @@ func withBaseModel(node *BaseModel) basemodelOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m BaseModelMutation) Client() *Client {
+func (m BaseMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -104,7 +104,7 @@ func (m BaseModelMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m BaseModelMutation) Tx() (*Tx, error) {
+func (m BaseMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -114,14 +114,14 @@ func (m BaseModelMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of BaseModel entities.
-func (m *BaseModelMutation) SetID(id int) {
+// operation is only accepted on creation of Base entities.
+func (m *BaseMutation) SetID(id int) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *BaseModelMutation) ID() (id int, exists bool) {
+func (m *BaseMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -132,7 +132,7 @@ func (m *BaseModelMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *BaseModelMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *BaseMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -141,19 +141,19 @@ func (m *BaseModelMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().BaseModel.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Base.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *BaseModelMutation) SetCreatedAt(t time.Time) {
+func (m *BaseMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *BaseModelMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *BaseMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -161,10 +161,10 @@ func (m *BaseModelMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the BaseModel entity.
-// If the BaseModel object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the Base entity.
+// If the Base object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BaseModelMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *BaseMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -179,17 +179,17 @@ func (m *BaseModelMutation) OldCreatedAt(ctx context.Context) (v time.Time, err 
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *BaseModelMutation) ResetCreatedAt() {
+func (m *BaseMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *BaseModelMutation) SetUpdatedAt(t time.Time) {
+func (m *BaseMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *BaseModelMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *BaseMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -197,10 +197,10 @@ func (m *BaseModelMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the BaseModel entity.
-// If the BaseModel object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the Base entity.
+// If the Base object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BaseModelMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err error) {
+func (m *BaseMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -215,48 +215,48 @@ func (m *BaseModelMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
-func (m *BaseModelMutation) ClearUpdatedAt() {
+func (m *BaseMutation) ClearUpdatedAt() {
 	m.updated_at = nil
-	m.clearedFields[basemodel.FieldUpdatedAt] = struct{}{}
+	m.clearedFields[base.FieldUpdatedAt] = struct{}{}
 }
 
 // UpdatedAtCleared returns if the "updated_at" field was cleared in this mutation.
-func (m *BaseModelMutation) UpdatedAtCleared() bool {
-	_, ok := m.clearedFields[basemodel.FieldUpdatedAt]
+func (m *BaseMutation) UpdatedAtCleared() bool {
+	_, ok := m.clearedFields[base.FieldUpdatedAt]
 	return ok
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *BaseModelMutation) ResetUpdatedAt() {
+func (m *BaseMutation) ResetUpdatedAt() {
 	m.updated_at = nil
-	delete(m.clearedFields, basemodel.FieldUpdatedAt)
+	delete(m.clearedFields, base.FieldUpdatedAt)
 }
 
-// Where appends a list predicates to the BaseModelMutation builder.
-func (m *BaseModelMutation) Where(ps ...predicate.BaseModel) {
+// Where appends a list predicates to the BaseMutation builder.
+func (m *BaseMutation) Where(ps ...predicate.Base) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *BaseModelMutation) Op() Op {
+func (m *BaseMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (BaseModel).
-func (m *BaseModelMutation) Type() string {
+// Type returns the node type of this mutation (Base).
+func (m *BaseMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *BaseModelMutation) Fields() []string {
+func (m *BaseMutation) Fields() []string {
 	fields := make([]string, 0, 2)
 	if m.created_at != nil {
-		fields = append(fields, basemodel.FieldCreatedAt)
+		fields = append(fields, base.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, basemodel.FieldUpdatedAt)
+		fields = append(fields, base.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -264,11 +264,11 @@ func (m *BaseModelMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *BaseModelMutation) Field(name string) (ent.Value, bool) {
+func (m *BaseMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case basemodel.FieldCreatedAt:
+	case base.FieldCreatedAt:
 		return m.CreatedAt()
-	case basemodel.FieldUpdatedAt:
+	case base.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
 	return nil, false
@@ -277,29 +277,29 @@ func (m *BaseModelMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *BaseModelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *BaseMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case basemodel.FieldCreatedAt:
+	case base.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case basemodel.FieldUpdatedAt:
+	case base.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown BaseModel field %s", name)
+	return nil, fmt.Errorf("unknown Base field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *BaseModelMutation) SetField(name string, value ent.Value) error {
+func (m *BaseMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case basemodel.FieldCreatedAt:
+	case base.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case basemodel.FieldUpdatedAt:
+	case base.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -307,119 +307,119 @@ func (m *BaseModelMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdatedAt(v)
 		return nil
 	}
-	return fmt.Errorf("unknown BaseModel field %s", name)
+	return fmt.Errorf("unknown Base field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *BaseModelMutation) AddedFields() []string {
+func (m *BaseMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *BaseModelMutation) AddedField(name string) (ent.Value, bool) {
+func (m *BaseMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *BaseModelMutation) AddField(name string, value ent.Value) error {
+func (m *BaseMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown BaseModel numeric field %s", name)
+	return fmt.Errorf("unknown Base numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *BaseModelMutation) ClearedFields() []string {
+func (m *BaseMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(basemodel.FieldUpdatedAt) {
-		fields = append(fields, basemodel.FieldUpdatedAt)
+	if m.FieldCleared(base.FieldUpdatedAt) {
+		fields = append(fields, base.FieldUpdatedAt)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *BaseModelMutation) FieldCleared(name string) bool {
+func (m *BaseMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *BaseModelMutation) ClearField(name string) error {
+func (m *BaseMutation) ClearField(name string) error {
 	switch name {
-	case basemodel.FieldUpdatedAt:
+	case base.FieldUpdatedAt:
 		m.ClearUpdatedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown BaseModel nullable field %s", name)
+	return fmt.Errorf("unknown Base nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *BaseModelMutation) ResetField(name string) error {
+func (m *BaseMutation) ResetField(name string) error {
 	switch name {
-	case basemodel.FieldCreatedAt:
+	case base.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case basemodel.FieldUpdatedAt:
+	case base.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown BaseModel field %s", name)
+	return fmt.Errorf("unknown Base field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *BaseModelMutation) AddedEdges() []string {
+func (m *BaseMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *BaseModelMutation) AddedIDs(name string) []ent.Value {
+func (m *BaseMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *BaseModelMutation) RemovedEdges() []string {
+func (m *BaseMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *BaseModelMutation) RemovedIDs(name string) []ent.Value {
+func (m *BaseMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *BaseModelMutation) ClearedEdges() []string {
+func (m *BaseMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *BaseModelMutation) EdgeCleared(name string) bool {
+func (m *BaseMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *BaseModelMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown BaseModel unique edge %s", name)
+func (m *BaseMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Base unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *BaseModelMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown BaseModel edge %s", name)
+func (m *BaseMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Base edge %s", name)
 }
 
 // NodeMutation represents an operation that mutates the Node nodes in the graph.

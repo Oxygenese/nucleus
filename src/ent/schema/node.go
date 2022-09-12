@@ -28,7 +28,7 @@ func (Node) Edges() []ent.Edge {
 // Mixin BaseModel
 func (Node) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		BaseModel{},
+		Base{},
 	}
 }
 

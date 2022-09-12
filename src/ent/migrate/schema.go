@@ -8,17 +8,17 @@ import (
 )
 
 var (
-	// BaseModelsColumns holds the columns for the "base_models" table.
-	BaseModelsColumns = []*schema.Column{
+	// BasesColumns holds the columns for the "bases" table.
+	BasesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 	}
-	// BaseModelsTable holds the schema information for the "base_models" table.
-	BaseModelsTable = &schema.Table{
-		Name:       "base_models",
-		Columns:    BaseModelsColumns,
-		PrimaryKey: []*schema.Column{BaseModelsColumns[0]},
+	// BasesTable holds the schema information for the "bases" table.
+	BasesTable = &schema.Table{
+		Name:       "bases",
+		Columns:    BasesColumns,
+		PrimaryKey: []*schema.Column{BasesColumns[0]},
 	}
 	// NodesColumns holds the columns for the "nodes" table.
 	NodesColumns = []*schema.Column{
@@ -43,7 +43,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		BaseModelsTable,
+		BasesTable,
 		NodesTable,
 	}
 )

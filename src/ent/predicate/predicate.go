@@ -6,8 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// BaseModel is the predicate function for basemodel builders.
-type BaseModel func(*sql.Selector)
+// Base is the predicate function for base builders.
+type Base func(*sql.Selector)
 
 // Node is the predicate function for node builders.
 type Node func(*sql.Selector)

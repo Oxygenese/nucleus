@@ -7,13 +7,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// BaseModel holds the schema definition for the BaseModel entity.
-type BaseModel struct {
+// Base holds the schema definition for the BaseModel entity.
+type Base struct {
 	ent.Schema
 }
 
-// Fields of the BaseModel.
-func (BaseModel) Fields() []ent.Field {
+// Fields of the Base.
+func (Base) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
 			Positive().
@@ -35,6 +35,6 @@ func (BaseModel) Fields() []ent.Field {
 }
 
 // Edges of the BaseModel.
-func (BaseModel) Edges() []ent.Edge {
+func (Base) Edges() []ent.Edge {
 	return nil
 }

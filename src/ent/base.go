@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/basemodel"
+	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/base"
 )
 
-// BaseModel is the model entity for the BaseModel schema.
-type BaseModel struct {
+// Base is the model entity for the Base schema.
+type Base struct {
 	config `json:"-"`
 	// ID of the ent.
 	// primary key
@@ -24,80 +24,80 @@ type BaseModel struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*BaseModel) scanValues(columns []string) ([]interface{}, error) {
+func (*Base) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case basemodel.FieldID:
+		case base.FieldID:
 			values[i] = new(sql.NullInt64)
-		case basemodel.FieldCreatedAt, basemodel.FieldUpdatedAt:
+		case base.FieldCreatedAt, base.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type BaseModel", columns[i])
+			return nil, fmt.Errorf("unexpected column %q for type Base", columns[i])
 		}
 	}
 	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the BaseModel fields.
-func (bm *BaseModel) assignValues(columns []string, values []interface{}) error {
+// to the Base fields.
+func (b *Base) assignValues(columns []string, values []interface{}) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case basemodel.FieldID:
+		case base.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			bm.ID = int(value.Int64)
-		case basemodel.FieldCreatedAt:
+			b.ID = int(value.Int64)
+		case base.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				bm.CreatedAt = value.Time
+				b.CreatedAt = value.Time
 			}
-		case basemodel.FieldUpdatedAt:
+		case base.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				bm.UpdatedAt = new(time.Time)
-				*bm.UpdatedAt = value.Time
+				b.UpdatedAt = new(time.Time)
+				*b.UpdatedAt = value.Time
 			}
 		}
 	}
 	return nil
 }
 
-// Update returns a builder for updating this BaseModel.
-// Note that you need to call BaseModel.Unwrap() before calling this method if this BaseModel
+// Update returns a builder for updating this Base.
+// Note that you need to call Base.Unwrap() before calling this method if this Base
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (bm *BaseModel) Update() *BaseModelUpdateOne {
-	return (&BaseModelClient{config: bm.config}).UpdateOne(bm)
+func (b *Base) Update() *BaseUpdateOne {
+	return (&BaseClient{config: b.config}).UpdateOne(b)
 }
 
-// Unwrap unwraps the BaseModel entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Base entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (bm *BaseModel) Unwrap() *BaseModel {
-	_tx, ok := bm.config.driver.(*txDriver)
+func (b *Base) Unwrap() *Base {
+	_tx, ok := b.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: BaseModel is not a transactional entity")
+		panic("ent: Base is not a transactional entity")
 	}
-	bm.config.driver = _tx.drv
-	return bm
+	b.config.driver = _tx.drv
+	return b
 }
 
 // String implements the fmt.Stringer.
-func (bm *BaseModel) String() string {
+func (b *Base) String() string {
 	var builder strings.Builder
-	builder.WriteString("BaseModel(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", bm.ID))
+	builder.WriteString("Base(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(bm.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(b.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := bm.UpdatedAt; v != nil {
+	if v := b.UpdatedAt; v != nil {
 		builder.WriteString("updated_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
@@ -105,11 +105,11 @@ func (bm *BaseModel) String() string {
 	return builder.String()
 }
 
-// BaseModels is a parsable slice of BaseModel.
-type BaseModels []*BaseModel
+// Bases is a parsable slice of Base.
+type Bases []*Base
 
-func (bm BaseModels) config(cfg config) {
-	for _i := range bm {
-		bm[_i].config = cfg
+func (b Bases) config(cfg config) {
+	for _i := range b {
+		b[_i].config = cfg
 	}
 }

@@ -5,7 +5,7 @@ package ent
 import (
 	"time"
 
-	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/basemodel"
+	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/base"
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/node"
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/schema"
 )
@@ -14,20 +14,20 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	basemodelFields := schema.BaseModel{}.Fields()
-	_ = basemodelFields
-	// basemodelDescCreatedAt is the schema descriptor for created_at field.
-	basemodelDescCreatedAt := basemodelFields[1].Descriptor()
-	// basemodel.DefaultCreatedAt holds the default value on creation for the created_at field.
-	basemodel.DefaultCreatedAt = basemodelDescCreatedAt.Default.(func() time.Time)
-	// basemodelDescUpdatedAt is the schema descriptor for updated_at field.
-	basemodelDescUpdatedAt := basemodelFields[2].Descriptor()
-	// basemodel.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	basemodel.UpdateDefaultUpdatedAt = basemodelDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// basemodelDescID is the schema descriptor for id field.
-	basemodelDescID := basemodelFields[0].Descriptor()
-	// basemodel.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	basemodel.IDValidator = basemodelDescID.Validators[0].(func(int) error)
+	baseFields := schema.Base{}.Fields()
+	_ = baseFields
+	// baseDescCreatedAt is the schema descriptor for created_at field.
+	baseDescCreatedAt := baseFields[1].Descriptor()
+	// base.DefaultCreatedAt holds the default value on creation for the created_at field.
+	base.DefaultCreatedAt = baseDescCreatedAt.Default.(func() time.Time)
+	// baseDescUpdatedAt is the schema descriptor for updated_at field.
+	baseDescUpdatedAt := baseFields[2].Descriptor()
+	// base.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	base.UpdateDefaultUpdatedAt = baseDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// baseDescID is the schema descriptor for id field.
+	baseDescID := baseFields[0].Descriptor()
+	// base.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	base.IDValidator = baseDescID.Validators[0].(func(int) error)
 	nodeMixin := schema.Node{}.Mixin()
 	nodeMixinFields0 := nodeMixin[0].Fields()
 	_ = nodeMixinFields0

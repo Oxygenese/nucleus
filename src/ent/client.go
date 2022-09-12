@@ -10,7 +10,7 @@ import (
 
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/migrate"
 
-	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/basemodel"
+	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/base"
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/node"
 
 	"entgo.io/ent/dialect"
@@ -22,8 +22,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// BaseModel is the client for interacting with the BaseModel builders.
-	BaseModel *BaseModelClient
+	// Base is the client for interacting with the Base builders.
+	Base *BaseClient
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
 }
@@ -39,7 +39,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.BaseModel = NewBaseModelClient(c.config)
+	c.Base = NewBaseClient(c.config)
 	c.Node = NewNodeClient(c.config)
 }
 
@@ -72,10 +72,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		BaseModel: NewBaseModelClient(cfg),
-		Node:      NewNodeClient(cfg),
+		ctx:    ctx,
+		config: cfg,
+		Base:   NewBaseClient(cfg),
+		Node:   NewNodeClient(cfg),
 	}, nil
 }
 
@@ -93,17 +93,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		BaseModel: NewBaseModelClient(cfg),
-		Node:      NewNodeClient(cfg),
+		ctx:    ctx,
+		config: cfg,
+		Base:   NewBaseClient(cfg),
+		Node:   NewNodeClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		BaseModel.
+//		Base.
 //		Query().
 //		Count(ctx)
 //
@@ -126,88 +126,88 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.BaseModel.Use(hooks...)
+	c.Base.Use(hooks...)
 	c.Node.Use(hooks...)
 }
 
-// BaseModelClient is a client for the BaseModel schema.
-type BaseModelClient struct {
+// BaseClient is a client for the Base schema.
+type BaseClient struct {
 	config
 }
 
-// NewBaseModelClient returns a client for the BaseModel from the given config.
-func NewBaseModelClient(c config) *BaseModelClient {
-	return &BaseModelClient{config: c}
+// NewBaseClient returns a client for the Base from the given config.
+func NewBaseClient(c config) *BaseClient {
+	return &BaseClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `basemodel.Hooks(f(g(h())))`.
-func (c *BaseModelClient) Use(hooks ...Hook) {
-	c.hooks.BaseModel = append(c.hooks.BaseModel, hooks...)
+// A call to `Use(f, g, h)` equals to `base.Hooks(f(g(h())))`.
+func (c *BaseClient) Use(hooks ...Hook) {
+	c.hooks.Base = append(c.hooks.Base, hooks...)
 }
 
-// Create returns a builder for creating a BaseModel entity.
-func (c *BaseModelClient) Create() *BaseModelCreate {
-	mutation := newBaseModelMutation(c.config, OpCreate)
-	return &BaseModelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Base entity.
+func (c *BaseClient) Create() *BaseCreate {
+	mutation := newBaseMutation(c.config, OpCreate)
+	return &BaseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of BaseModel entities.
-func (c *BaseModelClient) CreateBulk(builders ...*BaseModelCreate) *BaseModelCreateBulk {
-	return &BaseModelCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Base entities.
+func (c *BaseClient) CreateBulk(builders ...*BaseCreate) *BaseCreateBulk {
+	return &BaseCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for BaseModel.
-func (c *BaseModelClient) Update() *BaseModelUpdate {
-	mutation := newBaseModelMutation(c.config, OpUpdate)
-	return &BaseModelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Base.
+func (c *BaseClient) Update() *BaseUpdate {
+	mutation := newBaseMutation(c.config, OpUpdate)
+	return &BaseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *BaseModelClient) UpdateOne(bm *BaseModel) *BaseModelUpdateOne {
-	mutation := newBaseModelMutation(c.config, OpUpdateOne, withBaseModel(bm))
-	return &BaseModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BaseClient) UpdateOne(b *Base) *BaseUpdateOne {
+	mutation := newBaseMutation(c.config, OpUpdateOne, withBase(b))
+	return &BaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *BaseModelClient) UpdateOneID(id int) *BaseModelUpdateOne {
-	mutation := newBaseModelMutation(c.config, OpUpdateOne, withBaseModelID(id))
-	return &BaseModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BaseClient) UpdateOneID(id int) *BaseUpdateOne {
+	mutation := newBaseMutation(c.config, OpUpdateOne, withBaseID(id))
+	return &BaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for BaseModel.
-func (c *BaseModelClient) Delete() *BaseModelDelete {
-	mutation := newBaseModelMutation(c.config, OpDelete)
-	return &BaseModelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Base.
+func (c *BaseClient) Delete() *BaseDelete {
+	mutation := newBaseMutation(c.config, OpDelete)
+	return &BaseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *BaseModelClient) DeleteOne(bm *BaseModel) *BaseModelDeleteOne {
-	return c.DeleteOneID(bm.ID)
+func (c *BaseClient) DeleteOne(b *Base) *BaseDeleteOne {
+	return c.DeleteOneID(b.ID)
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *BaseModelClient) DeleteOneID(id int) *BaseModelDeleteOne {
-	builder := c.Delete().Where(basemodel.ID(id))
+func (c *BaseClient) DeleteOneID(id int) *BaseDeleteOne {
+	builder := c.Delete().Where(base.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &BaseModelDeleteOne{builder}
+	return &BaseDeleteOne{builder}
 }
 
-// Query returns a query builder for BaseModel.
-func (c *BaseModelClient) Query() *BaseModelQuery {
-	return &BaseModelQuery{
+// Query returns a query builder for Base.
+func (c *BaseClient) Query() *BaseQuery {
+	return &BaseQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a BaseModel entity by its id.
-func (c *BaseModelClient) Get(ctx context.Context, id int) (*BaseModel, error) {
-	return c.Query().Where(basemodel.ID(id)).Only(ctx)
+// Get returns a Base entity by its id.
+func (c *BaseClient) Get(ctx context.Context, id int) (*Base, error) {
+	return c.Query().Where(base.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *BaseModelClient) GetX(ctx context.Context, id int) *BaseModel {
+func (c *BaseClient) GetX(ctx context.Context, id int) *Base {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -216,8 +216,8 @@ func (c *BaseModelClient) GetX(ctx context.Context, id int) *BaseModel {
 }
 
 // Hooks returns the client hooks.
-func (c *BaseModelClient) Hooks() []Hook {
-	return c.hooks.BaseModel
+func (c *BaseClient) Hooks() []Hook {
+	return c.hooks.Base
 }
 
 // NodeClient is a client for the Node schema.

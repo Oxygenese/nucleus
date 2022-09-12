@@ -9,15 +9,15 @@ import (
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent"
 )
 
-// The BaseModelFunc type is an adapter to allow the use of ordinary
-// function as BaseModel mutator.
-type BaseModelFunc func(context.Context, *ent.BaseModelMutation) (ent.Value, error)
+// The BaseFunc type is an adapter to allow the use of ordinary
+// function as Base mutator.
+type BaseFunc func(context.Context, *ent.BaseMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f BaseModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.BaseModelMutation)
+func (f BaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.BaseMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BaseModelMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BaseMutation", m)
 	}
 	return f(ctx, mv)
 }

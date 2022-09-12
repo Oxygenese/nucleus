@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/basemodel"
+	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/base"
 	"gitlab.kylincloud.org/kylincloud/nucleus/src/ent/node"
 )
 
@@ -32,8 +32,8 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		basemodel.Table: basemodel.ValidColumn,
-		node.Table:      node.ValidColumn,
+		base.Table: base.ValidColumn,
+		node.Table: node.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
